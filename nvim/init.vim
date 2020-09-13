@@ -11,9 +11,9 @@ Plug 'dbakker/vim-projectroot'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'fweep/vim-tabber'
 Plug 'ervandew/supertab'
-Plug 'bling/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
+Plug 'itchyny/lightline.vim'
 Plug 'morhetz/gruvbox'
+Plug 'arcticicestudio/nord-vim'
 Plug 'sheerun/vim-polyglot'
 Plug 'garbas/vim-snipmate'
 Plug 'MarcWeber/vim-addon-mw-utils'
@@ -21,7 +21,8 @@ Plug 'tomtom/tlib_vim'
 " Elixir
 Plug 'elixir-lang/vim-elixir'
 " Elm
-Plug 'elmcast/elm-vim'
+" Plug 'elmcast/elm-vim'
+Plug 'andys8/vim-elm-syntax'
 " Webassembly
 Plug 'rhysd/vim-wasm'
 " Lisp
@@ -45,7 +46,7 @@ set background=dark    " Setting dark mode
 let g:gruvboc_italic = 1
 let g:gruvbox_italicize_comments = 1
 let g:gruvbox_italicize_strings = 1
-colorscheme gruvbox
+colorscheme nord
 
 if has("unix")
     let s:uname = substitute(system("uname -s"), '\n', '', '')
@@ -102,6 +103,9 @@ let g:snipMate = {}
 let g:snipMate.snippet_version = 1
 let g:snipMate.description_in_completion = 1
 
+" ELm
+let g:polyglot_disabled = ['elm']
+
 """
 " NAVIGATION SETTINGS
 ""
@@ -130,45 +134,14 @@ endif
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
 
-"""
-" ELM
-""
-let g:elm_jump_to_error = 0
-let g:elm_make_output_file = "elm.js"
-let g:elm_make_show_warnings = 0
-let g:elm_syntastic_show_warnings = 1
-let g:elm_browser_command = ""
-let g:elm_detailed_complete = 0
-let g:elm_format_autosave = 0
-let g:elm_format_fail_silently = 0
-let g:elm_setup_keybindings = 1
 
 """
-" Airline
+" Lightline
 ""
-if !exists('g:airline_symbols')
-  let g:airline_symbols = {}
-endif
-let g:airline_symbols.space = "\ua0"
-set ttimeoutlen=50
+let g:lightline = {
+      \ 'colorscheme': 'nord',
+      \ }
 
-let g:powerline_symbols = 'fancy'
-let g:airline_theme = 'gruvbox'
-let g:airline#extensions#hunks#enabled = 0
-let g:airline#extensions#branch#enabled = 1
-let g:airline#extensions#branch#format = 1
-
-let g:airline_powerline_fonts = 1
-let g:airline_left_sep = '▶'
-let g:airline_right_sep = '◀'
-let g:airline_symbols.linenr = '␊'
-let g:airline_symbols.linenr = '␤'
-let g:airline_symbols.linenr = '¶'
-let g:airline_symbols.branch = '⎇'
-let g:airline_symbols.paste = 'ρ'
-let g:airline_symbols.paste = 'Þ'
-let g:airline_symbols.paste = '∥'
-let g:airline_symbols.whitespace = 'Ξ'
 
 """
 " General Settings
@@ -209,3 +182,6 @@ set textwidth=79
 set formatoptions=qrn
 " Swap file
 set noswapfile
+" If backupcopy is set to yes, Vim will always create the backup file by copying 
+" the original file. In this case inotifywait is able to monitor the file.
+set backupcopy=yes
