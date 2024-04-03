@@ -1,3 +1,7 @@
+let g:polyglot_disabled = ['elm']
+let g:loaded_netrw = 1
+let g:loaded_netrwPlugin = 1
+
 """
 " Plug Settings
 """
@@ -18,18 +22,32 @@ Plug 'rhysd/vim-wasm'
 Plug 'purescript-contrib/purescript-vim'
 " Rescript
 Plug 'rescript-lang/vim-rescript'
+" Roc
+Plug 'ChrisWellsWood/roc.vim'
+" Gleam
+Plug 'gleam-lang/gleam.vim'
+" Go
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 " Coc
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 " FZF
 Plug 'junegunn/fzf'
 Plug 'junegunn/fzf.vim'
-
-Plug 'tpope/vim-eunuch'
+" NvimTree
+Plug 'nvim-tree/nvim-tree.lua'
+Plug 'nvim-tree/nvim-web-devicons'
+" Co-pilot
+Plug 'github/copilot.vim'
 call plug#end()
 
+"""
 " Leader Key
+""
 let mapleader="'"
 let maplocalleader = ","
+
+
+
 
 """
 " Colors & Fonts
@@ -41,29 +59,50 @@ let g:gruvbox_italicize_comments = 1
 let g:gruvbox_italicize_strings = 1
 colorscheme gruvbox
 
+
+
+
 """
 " Terminal Settings
 ""
 tnoremap <Esc> <C-\><C-n>
 
+
+
+
 """
-" netrw
+" NvimTree
 ""
-let g:netrw_liststyle = 3
-let g:netrw_banner = 0
-let g:netrw_keepdir = 0
-let g:netrw_browse_split = 0
-let g:netrw_altv = 0
-let g:netrw_fastbrowse = 1
-let g:netrw_winsize = 25
-" map <silent> <C-n> :set netrw_browse_split=bufnr('%') | :Lexplore<CR>
-map <silent> <C-n> :Exp<CR>
+lua << EOF
+-- set termguicolors to enable highlight groups
+vim.opt.termguicolors = true
+
+-- empty setup using defaults
+require("nvim-tree").setup()
+
+-- OR setup with some options
+require("nvim-tree").setup({
+  sort_by = "case_sensitive",
+  renderer = {
+    group_empty = true,
+  },
+  filters = {
+    dotfiles = true,
+  },
+})
+EOF
+
+nnoremap <silent> <C-n> :NvimTreeToggle<CR>
+nnoremap <silent> <C-b> :NvimTreeFindFile<CR>
+
+
 
 
 """
 " FZF
 ""
-nnoremap <leader>f :GFiles<CR>
+
+nnoremap <leader>f :Files<CR>
 nnoremap <leader>l :Lines<CR>
 nnoremap <leader>g :GGrep<CR>
 command! -bang -nargs=* GGrep
@@ -72,15 +111,23 @@ command! -bang -nargs=* GGrep
   \   fzf#vim#with_preview({'dir': systemlist('git rev-parse --show-toplevel')[0]}), <bang>0)
 
 
+
+
 """
 " Emmet
 ""
 imap <leader>e <C-y>,
 
-" ELm
-let g:polyglot_disabled = ['elm']
 
+"""
+" Vim Go
+""
+let g:go_def_mapping_enabled = 0
+
+
+"""
 " Coc
+""
 
 " Use `[g` and `]g` to navigate diagnostics
 " Use `:CocDiagnostics` to get all diagnostics of current buffer in location list
@@ -103,10 +150,10 @@ nnoremap <silent> <buffer> <localleader>rf :call CocActionAsync('refactor')<CR>
 nnoremap <silent> <buffer> <localleader>a :call CocActionAsync('codeAction')<CR>
 nnoremap <silent> <buffer> <localleader>i :call CocActionAsync('references')<CR>
 
-inoremap <silent><expr> <TAB>
-      \ coc#pum#visible() ? coc#pum#next(1): "\<Tab>"
-inoremap <silent><expr> <S-TAB>
-      \ coc#pum#visible() ? coc#pum#prev(1): "\<S-Tab>"
+inoremap <silent><expr> <Down>
+      \ coc#pum#visible() ? coc#pum#next(1): "\<Down>"
+inoremap <silent><expr> <Up>
+      \ coc#pum#visible() ? coc#pum#prev(1): "\<Up>"
 
 " Make <CR> to accept selected completion item or notify coc.nvim to format
 " <C-g>u breaks current undo, please make your own choice.
@@ -114,6 +161,15 @@ inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
 
 " Add `:Format` command to format current buffer.
 command! -nargs=0 Format :call CocActionAsync('format')
+
+
+
+"""
+" TComment
+""
+autocmd FileType rescript call tcomment#type#Define('rescript', '// %s')
+
+
 
 """
 " NAVIGATION SETTINGS
@@ -123,6 +179,9 @@ nnoremap <up> <nop>
 nnoremap <down> <nop>
 nnoremap <left> <nop>
 nnoremap <right> <nop>
+
+
+
 
 """
 " Clipboard registry settings
@@ -137,11 +196,15 @@ if has("unix")
 endif
 
 
+
+
 """
 " Syntastic
 ""
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
+
+
 
 
 """
@@ -158,6 +221,9 @@ autocmd FileType rescript setlocal ts=2 sw=2 expandtab
 " Tab settings for Js/typescript files
 autocmd FileType javascript setlocal ts=2 sw=2 expandtab
 autocmd FileType typescript setlocal ts=2 sw=2 expandtab
+
+
+
 
 """
 " General Settings
