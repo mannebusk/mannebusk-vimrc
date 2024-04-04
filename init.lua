@@ -1,5 +1,6 @@
 require('plugins')
 require('nvimtree')
+require('treesitter')
 
 -- Colors
 vim.o.background = "dark"
