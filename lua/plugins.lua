@@ -9,7 +9,11 @@ return require('packer').startup(function(use)
     use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
 
     -- UI / Colors / Theming
-    use { "ellisonleao/gruvbox.nvim" }
+    use { 'rmehri01/onenord.nvim' }
+    use {
+      'nvim-lualine/lualine.nvim',
+      requires = { 'nvim-tree/nvim-web-devicons', opt = true }
+    }
 
     -- Fuzzy finder
     use {
@@ -32,6 +36,7 @@ return require('packer').startup(function(use)
     }
     -- Other
     use 'terrortylor/nvim-comment'
+    use 'github/copilot.vim'
 
     -- Language support
     use 'rescript-lang/vim-rescript'
