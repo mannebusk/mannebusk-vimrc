@@ -2,6 +2,8 @@ require('plugins')
 require('nvimtree')
 require('treesitter')
 require('options')
+require('telescope')
+require('lsp_config')
 
 -- Colors
 vim.o.background = "dark"

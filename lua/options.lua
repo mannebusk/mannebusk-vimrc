@@ -1,3 +1,6 @@
+vim.g.mapleader = "'"
+vim.g.maplocalleader = ","
+
 -- General settings
 vim.opt.clipboard = 'unnamed'
 vim.o.listchars = 'tab:>-,trail:٠'
