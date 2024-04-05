@@ -2,6 +2,7 @@ require('plugins')
 require('nvimtree')
 require('treesitter')
 require('options')
+require('comment')
 require('telescope')
 require('lsp_config')
 
