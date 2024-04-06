@@ -1,3 +1,6 @@
+local augroup = vim.api.nvim_create_augroup -- Create/get autocommand group
+local autocmd = vim.api.nvim_create_autocmd -- Create autocommand
+
 vim.g.mapleader = "'"
 vim.g.maplocalleader = ","
 
@@ -13,6 +16,17 @@ vim.opt.shiftwidth = 4
 vim.opt.softtabstop = 4
 vim.opt.expandtab = true
 vim.opt.scrolloff = 10 -- Offset scroll from cursor
+
+-- Set indentation to 2 spaces
+augroup('setIndent', { clear = true })
+autocmd('Filetype', {
+    group = 'setIndent',
+    pattern = { 'css', 'html', 'javascript',
+        'lua', 'markdown', 'md', 'typescript',
+        'scss', 'xml', 'xhtml', 'yaml', 'gleam', 'rescript'
+    },
+    command = 'setlocal shiftwidth=2 tabstop=2 softtabstop=2'
+})
 
 -- History & Undo
 vim.opt.history = 1000    -- remember more commands and search history
