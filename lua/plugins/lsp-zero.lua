@@ -13,6 +13,13 @@ lsp_zero.on_attach(function(client, bufnr)
     end, opts)
 end)
 
+require('lspconfig').gleam.setup({
+    single_file_support = false,
+    on_attach = function(client, bufnr)
+        print('Hello gleam language server :)')
+    end
+})
+
 -- to learn how to use mason.nvim with lsp-zero
 -- read this: https://github.com/VonHeikemen/lsp-zero.nvim/blob/v3.x/doc/md/guide/integrate-with-mason-nvim.md
 require('mason').setup({})
