@@ -1,9 +1,9 @@
 return require('packer').startup(function(use)
-    use 'wbthomason/packer.nvim'
+    use { 'wbthomason/packer.nvim' }
 
     -- Nvim tree
-    use 'nvim-tree/nvim-tree.lua'
-    use 'nvim-tree/nvim-web-devicons'
+    use { 'nvim-tree/nvim-tree.lua' }
+    use { 'nvim-tree/nvim-web-devicons' }
 
     -- Syntax highlighting
     use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
@@ -11,8 +11,8 @@ return require('packer').startup(function(use)
     -- UI / Colors / Theming
     use { 'rmehri01/onenord.nvim' }
     use {
-      'nvim-lualine/lualine.nvim',
-      requires = { 'nvim-tree/nvim-web-devicons', opt = true }
+        'nvim-lualine/lualine.nvim',
+        requires = { 'nvim-tree/nvim-web-devicons', opt = true }
     }
 
     -- Fuzzy finder
@@ -35,9 +35,9 @@ return require('packer').startup(function(use)
         }
     }
     -- Other
-    use 'terrortylor/nvim-comment'
-    use 'github/copilot.vim'
+    use { 'terrortylor/nvim-comment' }
+    use { 'github/copilot.vim' }
 
     -- Language support
-    use 'rescript-lang/vim-rescript'
+    use { 'rescript-lang/vim-rescript' }
 end)

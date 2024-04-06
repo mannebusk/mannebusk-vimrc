@@ -1,7 +1,7 @@
 require('lualine').setup {
-  options = {
-    -- ... your lualine config
-    theme = 'onenord'
-    -- ... your lualine config
-  }
+    options = {
+        -- ... your lualine config
+        theme = 'onenord'
+        -- ... your lualine config
+    }
 }

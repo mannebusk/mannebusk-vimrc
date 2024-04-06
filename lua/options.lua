@@ -12,17 +12,17 @@ vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.softtabstop = 4
 vim.opt.expandtab = true
-vim.opt.scrolloff = 10          -- Offset scroll from cursor
+vim.opt.scrolloff = 10 -- Offset scroll from cursor
 
 -- History & Undo
-vim.opt.history = 1000          -- remember more commands and search history
-vim.opt.undolevels = 1000       -- use many muchos levels of undo
+vim.opt.history = 1000    -- remember more commands and search history
+vim.opt.undolevels = 1000 -- use many muchos levels of undo
 
 -- Searching
 vim.opt.ignorecase = true
-vim.opt.smartcase = true        -- case-insensitive on lowecase only, case-sensitive when any uppercase
-vim.opt.lisp = true             -- Make dashes part of word
-vim.opt.incsearch = true        -- show search matches as you type
+vim.opt.smartcase = true -- case-insensitive on lowecase only, case-sensitive when any uppercase
+vim.opt.lisp = true      -- Make dashes part of word
+vim.opt.incsearch = true -- show search matches as you type
 vim.opt.showmatch = true
 vim.opt.hlsearch = true
 
@@ -33,7 +33,8 @@ vim.opt.formatoptions = 'qrn'
 
 -- Swap file
 vim.opt.swapfile = false
-vim.opt.backupcopy = 'yes'      -- If backupcopy is set to yes, Vim will always create the backup file by copying the original file. In this case inotifywait is able to monitor the file.
+vim.opt.backupcopy =
+'yes' -- If backupcopy is set to yes, Vim will always create the backup file by copying the original file. In this case inotifywait is able to monitor the file.
 
 -- UI Stuff
 vim.opt.cursorline = true
