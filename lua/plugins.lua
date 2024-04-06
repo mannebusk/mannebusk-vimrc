@@ -37,6 +37,15 @@ return require('packer').startup(function(use)
     -- Other
     use { 'terrortylor/nvim-comment' }
     use { 'github/copilot.vim' }
+    use {
+        'rmagatti/auto-session',
+        config = function()
+            require("auto-session").setup {
+                log_level = "error",
+                auto_session_suppress_dirs = { "~/", "~/Downloads", "/" },
+            }
+        end
+    }
 
     -- Language support
     use { 'rescript-lang/vim-rescript' }
