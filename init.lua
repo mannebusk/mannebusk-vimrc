@@ -1,3 +1,4 @@
+vim = vim or require('vim')
 require('plugins')
 require('options')
 require('plugins.dressing')
