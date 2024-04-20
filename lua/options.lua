@@ -57,3 +57,7 @@ vim.opt.title = true
 vim.opt.wildmenu = true
 vim.o.wildmode = 'list:longest'
 vim.opt.relativenumber = true
+
+-- Colors
+vim.opt.termguicolors = true
+require('onenord').setup()
