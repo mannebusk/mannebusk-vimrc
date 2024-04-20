@@ -20,12 +20,12 @@ vim.opt.scrolloff = 10 -- Offset scroll from cursor
 -- Set indentation to 2 spaces
 augroup('setIndent', { clear = true })
 autocmd('Filetype', {
-    group = 'setIndent',
-    pattern = { 'css', 'html', 'javascript',
-        'lua', 'markdown', 'md', 'typescript',
-        'scss', 'xml', 'xhtml', 'yaml', 'gleam', 'rescript'
-    },
-    command = 'setlocal shiftwidth=2 tabstop=2 softtabstop=2'
+  group = 'setIndent',
+  pattern = { 'css', 'html', 'javascript', 'javascriptreact',
+    'lua', 'markdown', 'md', 'typescript', 'typescriptreact',
+    'scss', 'xml', 'xhtml', 'yaml', 'gleam', 'rescript'
+  },
+  command = 'setlocal shiftwidth=2 tabstop=2 softtabstop=2'
 })
 
 -- History & Undo
