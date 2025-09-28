@@ -7,6 +7,7 @@ return require('packer').startup(function(use)
 
   -- Syntax highlighting
   use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
+  use { 'windwp/nvim-ts-autotag' } -- Auto close xml tags
 
   -- UI / Colors / Theming
   use { 'stevearc/dressing.nvim' }
