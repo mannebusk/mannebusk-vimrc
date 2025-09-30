@@ -23,6 +23,10 @@ vim.api.nvim_create_user_command('LspKeys', function()
     "  ]D          - Last diagnostic",
     "  [D          - First diagnostic",
     "  <C-w>d      - Show diagnostic float",
+    "",
+    "Resources:",
+    "  https://microsoft.github.io/language-server-protocol/implementors/servers/",
+    "  (Press gx to open link)",
   }
 
   local buf = vim.api.nvim_create_buf(false, true)
