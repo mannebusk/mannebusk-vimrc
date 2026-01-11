@@ -195,6 +195,7 @@ vim.keymap.set('n', '<C-b>', ':NvimTreeFindFile<CR>', { silent = true })
 -- LSP
 --
 vim.lsp.enable('lua_ls')
+vim.lsp.enable('ts_ls')
 
 -- Set up the keymap when LSP attaches to a buffer
 vim.api.nvim_create_autocmd('LspAttach', {
