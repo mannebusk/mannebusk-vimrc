@@ -89,7 +89,9 @@ vim.pack.add({
   { src = 'https://github.com/terrortylor/nvim-comment' },
 
   { src = 'https://github.com/nvim-lua/plenary.nvim' },
-  { src = 'https://github.com/nvim-telescope/telescope.nvim' }
+  { src = 'https://github.com/nvim-telescope/telescope.nvim' },
+
+  { src = 'https://github.com/rescript-lang/vim-rescript' }
 })
 
 --
@@ -196,6 +198,7 @@ vim.keymap.set('n', '<C-b>', ':NvimTreeFindFile<CR>', { silent = true })
 --
 vim.lsp.enable('lua_ls')
 vim.lsp.enable('ts_ls')
+vim.lsp.enable('rescriptls')
 
 -- Set up the keymap when LSP attaches to a buffer
 vim.api.nvim_create_autocmd('LspAttach', {
