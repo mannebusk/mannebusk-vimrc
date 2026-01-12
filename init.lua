@@ -101,6 +101,12 @@ require('cheatsheet')
 
 
 --
+-- Configuration Commands
+--
+require('config')
+
+
+--
 -- blink.cmp (Autocomplete)
 --
 require('blink.cmp').setup({
