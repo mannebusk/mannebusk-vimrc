@@ -1,0 +1,45 @@
+{
+  "plugins": {
+    "blink.cmp": {
+      "rev": "327fff91fe6af358e990be7be1ec8b78037d2138",
+      "src": "https://github.com/Saghen/blink.cmp",
+      "version": "'v1.7.0'"
+    },
+    "gitcast.nvim": {
+      "rev": "188c349ca5474702fd9561242a9984a4054dc280",
+      "src": "https://github.com/n1kben/gitcast.nvim"
+    },
+    "lualine.nvim": {
+      "rev": "b8c23159c0161f4b89196f74ee3a6d02cdc3a955",
+      "src": "https://github.com/nvim-lualine/lualine.nvim"
+    },
+    "nvim-comment": {
+      "rev": "e9ac16ab056695cad6461173693069ec070d2b23",
+      "src": "https://github.com/terrortylor/nvim-comment"
+    },
+    "nvim-tree.lua": {
+      "rev": "e179ad2f83b5955ab0af653069a493a1828c2697",
+      "src": "https://github.com/nvim-tree/nvim-tree.lua"
+    },
+    "nvim-web-devicons": {
+      "rev": "f6b0920f452bfd7595ee9a9efe5e1ae78e0e2997",
+      "src": "https://github.com/nvim-tree/nvim-web-devicons"
+    },
+    "onenord.nvim": {
+      "rev": "77ca72a9ef771239eb43bf4b745285396e909bf6",
+      "src": "https://github.com/rmehri01/onenord.nvim"
+    },
+    "plenary.nvim": {
+      "rev": "b9fd5226c2f76c951fc8ed5923d85e4de065e509",
+      "src": "https://github.com/nvim-lua/plenary.nvim"
+    },
+    "telescope.nvim": {
+      "rev": "a8c2223ea6b185701090ccb1ebc7f4e41c4c9784",
+      "src": "https://github.com/nvim-telescope/telescope.nvim"
+    },
+    "vim-rescript": {
+      "rev": "ed38c1bea73b8d5b6337ad9447b179ed3c002025",
+      "src": "https://github.com/rescript-lang/vim-rescript"
+    }
+  }
+}
