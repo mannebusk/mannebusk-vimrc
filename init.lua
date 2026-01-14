@@ -71,6 +71,12 @@ require('onenord').setup()
 
 
 --
+-- Enable opening links in nvim from macOS
+--
+require("socket")
+
+
+--
 -- Packages/Plugins
 --
 vim.pack.add({
