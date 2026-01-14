@@ -211,15 +211,91 @@ vim.lsp.enable('graphql')
 vim.api.nvim_create_autocmd('LspAttach', {
   group = vim.api.nvim_create_augroup('UserLspConfig', {}),
   callback = function(ev)
+
+    --
+    -- Combined hover function that shows diagnostics and hover info together
+    -- 
+    local function combined_hover()
+      local bufnr = vim.api.nvim_get_current_buf()
+      local cursor_pos = vim.api.nvim_win_get_cursor(0)
+      local line = cursor_pos[1] - 1  -- 0-indexed
+      local col = cursor_pos[2]
+
+      -- Get diagnostics at the exact cursor position
+      local diagnostics = vim.diagnostic.get(bufnr, { lnum = line })
+      local filtered_diags = {}
+      for _, diag in ipairs(diagnostics) do
+        if col >= diag.col and col <= diag.end_col then
+          table.insert(filtered_diags, diag)
+        end
+      end
+
+      -- Format diagnostics
+      local diagnostic_lines = {}
+      if #filtered_diags > 0 then
+        for _, diag in ipairs(filtered_diags) do
+          local severity_icon = ({
+            [vim.diagnostic.severity.ERROR] = 'E',
+            [vim.diagnostic.severity.WARN] = 'W',
+            [vim.diagnostic.severity.INFO] = 'I',
+            [vim.diagnostic.severity.HINT] = 'H',
+          })[diag.severity] or '?'
+
+          table.insert(diagnostic_lines, string.format('[%s] %s', severity_icon, diag.message))
+        end
+      end
+
+      -- Request hover info
+      local params = vim.lsp.util.make_position_params()
+      vim.lsp.buf_request(bufnr, 'textDocument/hover', params, function(err, result)
+        if err then return end
+
+        local hover_lines = {}
+        if result and result.contents then
+          if #filtered_diags > 0 then
+            table.insert(diagnostic_lines, '')
+            table.insert(diagnostic_lines, '---')
+            table.insert(diagnostic_lines, '')
+          end
+
+          local contents = result.contents
+          if type(contents) == 'table' and contents.value then
+            -- MarkupContent format
+            hover_lines = vim.split(contents.value, '\n')
+          elseif type(contents) == 'string' then
+            hover_lines = vim.split(contents, '\n')
+          elseif type(contents) == 'table' and contents[1] then
+            -- Array of MarkedString
+            for _, item in ipairs(contents) do
+              local text = type(item) == 'string' and item or item.value
+              vim.list_extend(hover_lines, vim.split(text, '\n'))
+            end
+          end
+        end
+
+        -- Combine and display
+        local combined_lines = vim.list_extend(diagnostic_lines, hover_lines)
+        if #combined_lines > 0 then
+          vim.lsp.util.open_floating_preview(combined_lines, 'markdown', {
+            border = 'rounded',
+            focusable = true,
+            focus = false,
+            close_events = { 'CursorMoved', 'CursorMovedI', 'BufLeave' },
+          })
+        end
+      end)
+    end
+
+    --
     -- Set keymap for formatting
+    --
     vim.keymap.set('n', 'gf', function()
       vim.lsp.buf.format({ async = true })
     end, { buffer = ev.buf, desc = 'Format buffer' })
+
+    --
+    -- Override K keybinding for combined hover
+    --
+    vim.keymap.set('n', 'K', combined_hover, { buffer = ev.buf, desc = 'Show diagnostics and hover' })
   end,
 })
-
-
---
--- Make myself happy with a little greeting
---
-print("Hello myself!")
