@@ -86,6 +86,8 @@ vim.pack.add({
   { src = 'https://github.com/nvim-tree/nvim-tree.lua' },
   { src = 'https://github.com/nvim-tree/nvim-web-devicons' },
 
+  { src = 'https://github.com/nvim-treesitter/nvim-treesitter' },
+
   {
     src = 'https://github.com/Saghen/blink.cmp',
     version = 'v1.7.0',
@@ -112,6 +114,13 @@ require('cheatsheet')
 -- Configuration Commands
 --
 require('config')
+
+
+--
+-- nvim-treesitter
+--
+require('nvim-treesitter').install { 'javascript', 'typescript', 'html', 'css', 'lua', 'xml', 'json', 'graphql', 'rescript', 'sql' }
+vim.g.markdown_fenced_languages = { 'javascript', 'typescript', 'html', 'css', 'lua', 'xml', 'json', 'graphql', 'rescript', 'sql' }
 
 
 --
@@ -294,6 +303,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
             focusable = true,
             focus = false,
             close_events = { 'CursorMoved', 'CursorMovedI', 'BufLeave' },
+            syntax = "markdown",
           })
         end
       end)
