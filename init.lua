@@ -101,7 +101,13 @@ vim.pack.add({
 
   { src = 'https://github.com/rescript-lang/vim-rescript' },
 
-  { src = 'https://github.com/n1kben/gitcast.nvim' }
+  { src = 'https://github.com/dmmulroy/tsc.nvim' },
+
+  { src = 'https://github.com/n1kben/gitcast.nvim' },
+
+  { src = 'https://github.com/ibhagwan/fzf-lua' },
+
+  { src = 'https://github.com/supermaven-inc/supermaven-nvim' }
 })
 
 --
@@ -120,8 +126,19 @@ require('config')
 -- nvim-treesitter
 --
 require('nvim-treesitter').install { 'javascript', 'typescript', 'html', 'css', 'lua', 'xml', 'json', 'graphql', 'rescript', 'sql' }
-vim.g.markdown_fenced_languages = { 'javascript', 'typescript', 'html', 'css', 'lua', 'xml', 'json', 'graphql', 'rescript', 'sql' }
+vim.g.markdown_fenced_languages = { 'javascript', 'typescript', 'html', 'css', 'lua', 'xml', 'json', 'graphql',
+  'rescript', 'sql' }
 
+
+--
+-- supermaven-nvim
+--
+require("supermaven-nvim").setup({
+  keymaps = {
+    accept_suggestion = "<S-Tab>",
+    accept_word = "<Tab>",
+  }
+})
 
 --
 -- blink.cmp (Autocomplete)
@@ -184,7 +201,7 @@ require('gitcast').setup()
 local builtin = require('telescope.builtin')
 
 
-vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
+-- vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
 vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
 vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
 vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
@@ -201,6 +218,13 @@ require('lualine').setup {
   }
 }
 
+
+--
+-- FZF
+--
+
+vim.keymap.set('n', '<leader>ff',
+  function() require("fzf-lua").combine({ pickers = "buffers;oldfiles;files", previewer = false }) end, {})
 
 --
 -- nvim-tree
@@ -322,3 +346,9 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', 'K', combined_hover, { buffer = ev.buf, desc = 'Show diagnostics and hover' })
   end,
 })
+
+
+--
+-- TSC - Typescript compier
+--
+require('tsc').setup()
