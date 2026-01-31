@@ -352,3 +352,9 @@ vim.api.nvim_create_autocmd('LspAttach', {
 -- TSC - Typescript compier
 --
 require('tsc').setup()
+
+
+--
+-- PR Comments - GitHub PR review comments viewer
+--
+require('pr-comments').setup()
