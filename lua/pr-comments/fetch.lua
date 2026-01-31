@@ -37,6 +37,7 @@ function M.normalize_comments(comments)
     if line and c.path then
       table.insert(normalized, {
         id = c.id,
+        in_reply_to_id = c.in_reply_to_id, -- nil for parent, number for reply
         path = c.path,
         line = line,
         body = c.body or '',
