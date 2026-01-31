@@ -9,6 +9,7 @@ local fetch = require('pr-comments.fetch')
 local quickfix = require('pr-comments.quickfix')
 local signs = require('pr-comments.signs')
 local preview = require('pr-comments.preview')
+local reply = require('pr-comments.reply')
 
 -- Cache for fetched comments
 M._comments_cache = nil
@@ -110,6 +111,12 @@ function M.setup(opts)
     M.show_comment()
   end, {
     desc = 'Show PR comment at cursor in floating window',
+  })
+
+  vim.api.nvim_create_user_command('PRCommentReply', function()
+    reply.reply_at_cursor()
+  end, {
+    desc = 'Reply to PR comment at cursor',
   })
 
   vim.api.nvim_create_user_command('PRCommentsClear', function()
