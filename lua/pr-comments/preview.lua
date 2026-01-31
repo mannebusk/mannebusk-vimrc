@@ -203,6 +203,16 @@ function M.show_expanded(comments)
     end
   end, opts)
 
+  -- Reply with r
+  vim.keymap.set('n', 'r', function()
+    local buf_comments = vim.b[preview_buf].pr_comments
+    close_preview()
+    if buf_comments and #buf_comments > 0 then
+      local reply = require('pr-comments.reply')
+      reply.reply_from_preview(buf_comments)
+    end
+  end, opts)
+
   -- Close on leaving the window
   vim.api.nvim_create_autocmd('WinLeave', {
     buffer = preview_buf,
