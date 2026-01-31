@@ -70,7 +70,8 @@ end
 --- Populate quickfix list with PR comments
 ---@param comments table[] Normalized comments
 ---@param pr_number number PR number for title
-function M.populate(comments, pr_number)
+---@param show_resolved boolean|nil Whether resolved comments are being shown
+function M.populate(comments, pr_number, show_resolved)
   local git_root = get_git_root()
   if not git_root then
     vim.notify('Failed to get git root directory', vim.log.levels.ERROR)
@@ -97,10 +98,14 @@ function M.populate(comments, pr_number)
 
     local num_replies = reply_count[comment.id] or 0
     local text
+    -- Add [RESOLVED] prefix when showing resolved comments
+    local prefix = (show_resolved and comment.is_resolved) and '[RESOLVED] ' or ''
+
     if num_replies > 0 then
       -- Has replies: show comment count (parent + replies)
       local total = num_replies + 1
-      text = string.format('@%s: %d %s',
+      text = string.format('%s@%s: %d %s',
+        prefix,
         comment.author or 'unknown',
         total,
         total == 1 and 'comment' or 'comments')
@@ -110,7 +115,7 @@ function M.populate(comments, pr_number)
       if #body_preview > 80 then
         body_preview = body_preview:sub(1, 77) .. '...'
       end
-      text = string.format('@%s: %s', comment.author or 'unknown', body_preview)
+      text = string.format('%s@%s: %s', prefix, comment.author or 'unknown', body_preview)
     end
 
     table.insert(qf_items, {
@@ -124,9 +129,26 @@ function M.populate(comments, pr_number)
     ::continue::
   end
 
+  -- Count resolved comments for title
+  local resolved_count = 0
+  if show_resolved then
+    for _, comment in ipairs(comments) do
+      if comment.is_resolved and not comment.in_reply_to_id then
+        resolved_count = resolved_count + 1
+      end
+    end
+  end
+
   -- Set quickfix list
+  local title
+  if show_resolved and resolved_count > 0 then
+    title = string.format('PR #%d Review Comments (%d, %d resolved)', pr_number, #qf_items, resolved_count)
+  else
+    title = string.format('PR #%d Review Comments (%d)', pr_number, #qf_items)
+  end
+
   vim.fn.setqflist({}, 'r', {
-    title = string.format('PR #%d Review Comments (%d)', pr_number, #qf_items),
+    title = title,
     items = qf_items,
   })
 

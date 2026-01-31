@@ -73,8 +73,14 @@ end
 local function format_comments(comments)
   local lines = {}
 
-  -- Show diff once at the top (from first comment)
+  -- Show [RESOLVED] banner if thread is resolved
   local first_comment = comments[1]
+  if first_comment and first_comment.is_resolved then
+    table.insert(lines, '**[RESOLVED]**')
+    table.insert(lines, '')
+  end
+
+  -- Show diff once at the top (from first comment)
   if first_comment and first_comment.diff_hunk and first_comment.diff_hunk ~= '' then
     local hunk_lines = {}
     for line in first_comment.diff_hunk:gmatch('[^\r\n]+') do
@@ -161,6 +167,10 @@ function M.show_expanded(comments)
   local row = math.floor((vim.o.lines - height) / 2)
   local col = math.floor((vim.o.columns - width) / 2)
 
+  -- Determine window title based on resolved status
+  local is_resolved = comments[1] and comments[1].is_resolved
+  local title = is_resolved and ' PR Comment [RESOLVED] ' or ' PR Comment '
+
   -- Create window
   preview_win = vim.api.nvim_open_win(preview_buf, true, {
     relative = 'editor',
@@ -170,7 +180,7 @@ function M.show_expanded(comments)
     col = col,
     style = 'minimal',
     border = 'rounded',
-    title = ' PR Comment ',
+    title = title,
     title_pos = 'center',
   })
 
@@ -181,6 +191,8 @@ function M.show_expanded(comments)
 
   -- Store comments for gx access
   vim.b[preview_buf].pr_comments = comments
+  vim.b[preview_buf].pr_thread_id = comments[1] and comments[1].thread_id
+  vim.b[preview_buf].pr_is_resolved = comments[1] and comments[1].is_resolved
 
   -- Set up keymaps
   local opts = { buffer = preview_buf, noremap = true, silent = true }
@@ -208,8 +220,21 @@ function M.show_expanded(comments)
     local buf_comments = vim.b[preview_buf].pr_comments
     close_preview()
     if buf_comments and #buf_comments > 0 then
-      local reply = require('pr-comments.reply')
-      reply.reply_from_preview(buf_comments)
+      local reply_mod = require('pr-comments.reply')
+      reply_mod.reply_from_preview(buf_comments)
+    end
+  end, opts)
+
+  -- Resolve thread with x
+  vim.keymap.set('n', 'x', function()
+    local thread_id = vim.b[preview_buf].pr_thread_id
+    local is_resolved = vim.b[preview_buf].pr_is_resolved
+    close_preview()
+    if thread_id then
+      local resolve = require('pr-comments.resolve')
+      resolve.resolve_thread_interactive(thread_id, is_resolved)
+    else
+      vim.notify('Cannot resolve: thread ID not available', vim.log.levels.ERROR)
     end
   end, opts)
 
