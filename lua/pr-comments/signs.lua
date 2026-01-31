@@ -8,8 +8,10 @@ local NAMESPACE = vim.api.nvim_create_namespace('pr-comments')
 
 -- Store comments indexed by filepath:line for quick lookup
 M._comments_by_file_line = {}
--- Store lines by file for sign placement
+-- Store lines by file for sign placement (with resolved status)
 M._lines_by_file = {}
+-- Store resolved status by file:line
+M._resolved_by_file_line = {}
 
 --- Get the git repository root directory
 ---@return string|nil root_dir
@@ -31,6 +33,7 @@ function M.clear_signs()
   end
   M._comments_by_file_line = {}
   M._lines_by_file = {}
+  M._resolved_by_file_line = {}
   -- Clear the autocmd group
   vim.api.nvim_create_augroup('PRCommentSigns', { clear = true })
 end
@@ -58,9 +61,16 @@ local function place_signs_in_buffer(bufnr)
   local lines = M._lines_by_file[normalized_bufname]
   if lines then
     for line, _ in pairs(lines) do
+      local key = normalized_bufname .. ':' .. line
+      local is_resolved = M._resolved_by_file_line[key]
+
+      -- Use different sign for resolved vs unresolved comments
+      local sign_text = is_resolved and '✓' or '💬'
+      local sign_hl = is_resolved and 'DiagnosticOk' or 'DiagnosticInfo'
+
       vim.api.nvim_buf_set_extmark(bufnr, NAMESPACE, line - 1, 0, {
-        sign_text = '💬',
-        sign_hl_group = 'DiagnosticInfo',
+        sign_text = sign_text,
+        sign_hl_group = sign_hl,
         priority = 10,
       })
     end
@@ -94,6 +104,11 @@ function M.place_signs(comments)
       M._lines_by_file[filepath] = {}
     end
     M._lines_by_file[filepath][comment.line] = true
+
+    -- Track resolved status (use first comment's status as thread indicator)
+    if M._resolved_by_file_line[key] == nil then
+      M._resolved_by_file_line[key] = comment.is_resolved
+    end
   end
 
   -- Place signs for files that are currently loaded in buffers

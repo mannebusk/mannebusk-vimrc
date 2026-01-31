@@ -54,8 +54,8 @@ end
 local function submit_reply(parent_id, body, callback)
   local fetch = require('pr-comments.fetch')
 
-  local repo = fetch.get_repo_info()
-  if not repo then
+  local owner, repo = fetch.get_repo_info()
+  if not owner or not repo then
     callback(false, 'Failed to get repository info')
     return
   end
@@ -67,7 +67,7 @@ local function submit_reply(parent_id, body, callback)
   end
 
   -- GitHub API: POST /repos/{owner}/{repo}/pulls/{pull_number}/comments/{comment_id}/replies
-  local api_path = string.format('repos/%s/pulls/%d/comments/%d/replies', repo, pr_number, parent_id)
+  local api_path = string.format('repos/%s/%s/pulls/%d/comments/%d/replies', owner, repo, pr_number, parent_id)
 
   vim.system(
     { 'gh', 'api', '-X', 'POST', api_path, '-f', 'body=' .. body },

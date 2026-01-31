@@ -15,10 +15,85 @@ local reply = require('pr-comments.reply')
 M._comments_cache = nil
 M._pr_number_cache = nil
 
+-- Session state for resolved filter (nil = use config default)
+M._show_resolved = nil
+
 --- Default configuration
 M.config = {
   keymap = '<leader>pc', -- Keymap to show comment at cursor
+  show_resolved = false, -- Hide resolved comments by default
 }
+
+--- Get the effective show_resolved value
+---@return boolean
+function M.get_show_resolved()
+  if M._show_resolved ~= nil then
+    return M._show_resolved
+  end
+  return M.config.show_resolved
+end
+
+--- Filter comments based on resolved status
+---@param comments table[] All comments
+---@return table[] filtered_comments
+function M.filter_comments(comments)
+  if M.get_show_resolved() then
+    return comments
+  end
+
+  local filtered = {}
+  for _, c in ipairs(comments) do
+    if not c.is_resolved then
+      table.insert(filtered, c)
+    end
+  end
+  return filtered
+end
+
+--- Refresh the display with current filter settings
+function M.refresh_display()
+  if not M._comments_cache or not M._pr_number_cache then
+    vim.notify('No comments loaded. Run :PRComments first.', vim.log.levels.WARN)
+    return
+  end
+
+  local filtered = M.filter_comments(M._comments_cache)
+
+  if #filtered == 0 then
+    vim.notify('No comments to display with current filter', vim.log.levels.INFO)
+    vim.fn.setqflist({}, 'r', {
+      title = string.format('PR #%d Review Comments (0)', M._pr_number_cache),
+      items = {},
+    })
+    signs.clear_signs()
+    return
+  end
+
+  quickfix.populate(filtered, M._pr_number_cache, M.get_show_resolved())
+  signs.place_signs(filtered)
+end
+
+--- Toggle showing resolved comments
+function M.toggle_show_resolved()
+  M._show_resolved = not M.get_show_resolved()
+  local status = M._show_resolved and 'shown' or 'hidden'
+  vim.notify('Resolved comments: ' .. status, vim.log.levels.INFO)
+  M.refresh_display()
+end
+
+--- Force show resolved comments
+function M.show_resolved()
+  M._show_resolved = true
+  vim.notify('Resolved comments: shown', vim.log.levels.INFO)
+  M.refresh_display()
+end
+
+--- Force hide resolved comments
+function M.hide_resolved()
+  M._show_resolved = false
+  vim.notify('Resolved comments: hidden', vim.log.levels.INFO)
+  M.refresh_display()
+end
 
 --- Fetch and display PR comments
 ---@param pr_number number|nil PR number (auto-detect if nil)
@@ -54,17 +129,32 @@ function M.fetch_and_display(pr_number)
       return
     end
 
-    -- Cache the comments
+    -- Cache all comments (unfiltered)
     M._comments_cache = comments
     M._pr_number_cache = pr_number
 
-    -- Populate quickfix list
-    quickfix.populate(comments, pr_number)
+    -- Count resolved vs unresolved
+    local resolved_count = 0
+    for _, c in ipairs(comments) do
+      if c.is_resolved and not c.in_reply_to_id then
+        resolved_count = resolved_count + 1
+      end
+    end
+
+    -- Filter comments based on show_resolved setting
+    local filtered = M.filter_comments(comments)
+
+    -- Populate quickfix list with filtered comments
+    quickfix.populate(filtered, pr_number, M.get_show_resolved())
 
     -- Place signs on commented lines
-    signs.place_signs(comments)
+    signs.place_signs(filtered)
 
-    vim.notify(string.format('Loaded %d review comments for PR #%d', #comments, pr_number), vim.log.levels.INFO)
+    local msg = string.format('Loaded %d review comments for PR #%d', #comments, pr_number)
+    if resolved_count > 0 and not M.get_show_resolved() then
+      msg = msg .. string.format(' (%d resolved hidden)', resolved_count)
+    end
+    vim.notify(msg, vim.log.levels.INFO)
   end)
 end
 
@@ -129,6 +219,24 @@ function M.setup(opts)
     signs.debug()
   end, {
     desc = 'Debug PR comments - show stored paths vs current buffer',
+  })
+
+  vim.api.nvim_create_user_command('PRCommentsToggleResolved', function()
+    M.toggle_show_resolved()
+  end, {
+    desc = 'Toggle showing resolved PR comments',
+  })
+
+  vim.api.nvim_create_user_command('PRCommentsShowResolved', function()
+    M.show_resolved()
+  end, {
+    desc = 'Show resolved PR comments',
+  })
+
+  vim.api.nvim_create_user_command('PRCommentsHideResolved', function()
+    M.hide_resolved()
+  end, {
+    desc = 'Hide resolved PR comments',
   })
 
   -- Set up keymap
