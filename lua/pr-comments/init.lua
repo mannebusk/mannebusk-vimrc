@@ -74,6 +74,7 @@ end
 
 --- Clear all PR comment data
 function M.clear()
+  preview.close()
   signs.clear_signs()
   M._comments_cache = nil
   M._pr_number_cache = nil
@@ -88,9 +89,6 @@ function M.setup(opts)
   if opts then
     M.config = vim.tbl_deep_extend('force', M.config, opts)
   end
-
-  -- Define signs
-  signs.define_signs()
 
   -- Create commands
   vim.api.nvim_create_user_command('PRComments', function(cmd_opts)
