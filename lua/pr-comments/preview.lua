@@ -73,6 +73,28 @@ end
 local function format_comments(comments)
   local lines = {}
 
+  -- Show diff once at the top (from first comment)
+  local first_comment = comments[1]
+  if first_comment and first_comment.diff_hunk and first_comment.diff_hunk ~= '' then
+    local hunk_lines = {}
+    for line in first_comment.diff_hunk:gmatch('[^\r\n]+') do
+      table.insert(hunk_lines, line)
+    end
+    local start_idx = math.max(1, #hunk_lines - 7)
+    table.insert(lines, '```diff')
+    if start_idx > 1 then
+      table.insert(lines, '...')
+    end
+    for j = start_idx, #hunk_lines do
+      table.insert(lines, hunk_lines[j])
+    end
+    table.insert(lines, '```')
+    table.insert(lines, '')
+    table.insert(lines, '---')
+    table.insert(lines, '')
+  end
+
+  -- Then list all comments without the diff
   for i, comment in ipairs(comments) do
     if i > 1 then
       table.insert(lines, '')
@@ -80,40 +102,22 @@ local function format_comments(comments)
       table.insert(lines, '')
     end
 
-    -- Author and date header
+    -- Author and date/time header
     local date_str = ''
     if comment.created_at and comment.created_at ~= '' then
-      date_str = ' (' .. comment.created_at:sub(1, 10) .. ')'
+      -- Format: "2024-01-15T14:30:00Z" -> "2024-01-15 14:30"
+      local datetime = comment.created_at:sub(1, 16):gsub('T', ' ')
+      date_str = ' (' .. datetime .. ')'
     end
     table.insert(lines, string.format('**@%s**%s', comment.author, date_str))
     table.insert(lines, '')
 
-    -- Diff hunk context (show last 8 lines for relevance)
-    if comment.diff_hunk and comment.diff_hunk ~= '' then
-      local hunk_lines = {}
-      for line in comment.diff_hunk:gmatch('[^\r\n]+') do
-        table.insert(hunk_lines, line)
-      end
-      -- Keep only last 8 lines (most relevant to the comment)
-      local start_idx = math.max(1, #hunk_lines - 7)
-      table.insert(lines, '```diff')
-      if start_idx > 1 then
-        table.insert(lines, '...')
-      end
-      for j = start_idx, #hunk_lines do
-        table.insert(lines, hunk_lines[j])
-      end
-      table.insert(lines, '```')
-      table.insert(lines, '')
-    end
-
-    -- Comment body (sanitized)
+    -- Comment body (sanitized) - NO diff here
     local clean_body = sanitize_body(comment.body)
     for line in clean_body:gmatch('[^\r\n]+') do
       table.insert(lines, line)
     end
 
-    -- Store URL for gx keymap (as hidden data at end)
     comment._index = i
   end
 
