@@ -224,4 +224,9 @@ function M.show_at_cursor()
   M.show_expanded(comments)
 end
 
+--- Close the preview window (exported for external use)
+function M.close()
+  close_preview()
+end
+
 return M

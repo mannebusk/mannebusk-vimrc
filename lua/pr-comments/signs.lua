@@ -3,23 +3,13 @@
 
 local M = {}
 
--- Sign name constant
-local SIGN_NAME = 'PRComment'
-local SIGN_GROUP = 'pr_comments'
+-- Namespace for extmarks
+local NAMESPACE = vim.api.nvim_create_namespace('pr-comments')
 
 -- Store comments indexed by filepath:line for quick lookup
 M._comments_by_file_line = {}
 -- Store lines by file for sign placement
 M._lines_by_file = {}
-
---- Define the sign for PR comments
-function M.define_signs()
-  vim.fn.sign_define(SIGN_NAME, {
-    text = '',
-    texthl = 'DiagnosticInfo',
-    numhl = '',
-  })
-end
 
 --- Get the git repository root directory
 ---@return string|nil root_dir
@@ -33,7 +23,12 @@ end
 
 --- Clear all placed signs
 function M.clear_signs()
-  vim.fn.sign_unplace(SIGN_GROUP)
+  -- Clear extmarks in all loaded buffers
+  for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_loaded(bufnr) then
+      vim.api.nvim_buf_clear_namespace(bufnr, NAMESPACE, 0, -1)
+    end
+  end
   M._comments_by_file_line = {}
   M._lines_by_file = {}
   -- Clear the autocmd group
@@ -55,12 +50,19 @@ end
 --- Place signs in a specific buffer if it has comments
 ---@param bufnr number Buffer number
 local function place_signs_in_buffer(bufnr)
+  -- Clear existing extmarks in this buffer first (prevents duplicates)
+  vim.api.nvim_buf_clear_namespace(bufnr, NAMESPACE, 0, -1)
+
   local bufname = vim.api.nvim_buf_get_name(bufnr)
   local normalized_bufname = normalize_path(bufname)
   local lines = M._lines_by_file[normalized_bufname]
   if lines then
     for line, _ in pairs(lines) do
-      vim.fn.sign_place(0, SIGN_GROUP, SIGN_NAME, bufnr, { lnum = line, priority = 10 })
+      vim.api.nvim_buf_set_extmark(bufnr, NAMESPACE, line - 1, 0, {
+        sign_text = '💬',
+        sign_hl_group = 'DiagnosticInfo',
+        priority = 10,
+      })
     end
   end
 end
@@ -105,9 +107,9 @@ function M.place_signs(comments)
   vim.api.nvim_create_autocmd('BufEnter', {
     group = vim.api.nvim_create_augroup('PRCommentSigns', { clear = true }),
     callback = function(ev)
-      -- Only place if we haven't already (check for existing signs)
-      local existing = vim.fn.sign_getplaced(ev.buf, { group = SIGN_GROUP })
-      if existing[1] and #existing[1].signs == 0 then
+      -- Only place if we haven't already (check for existing extmarks)
+      local existing = vim.api.nvim_buf_get_extmarks(ev.buf, NAMESPACE, 0, -1, {})
+      if #existing == 0 then
         place_signs_in_buffer(ev.buf)
       end
     end,
