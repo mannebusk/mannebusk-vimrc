@@ -77,24 +77,41 @@ function M.populate(comments, pr_number)
     return
   end
 
-  -- Sort comments so replies follow their parent
-  local sorted_comments = sort_comments_with_replies(comments)
+  -- Count replies for each parent comment
+  local reply_count = {}
+  for _, comment in ipairs(comments) do
+    if comment.in_reply_to_id then
+      reply_count[comment.in_reply_to_id] = (reply_count[comment.in_reply_to_id] or 0) + 1
+    end
+  end
 
   local qf_items = {}
-  for _, comment in ipairs(sorted_comments) do
+  for _, comment in ipairs(comments) do
+    -- Skip replies - they'll be counted with their parent
+    if comment.in_reply_to_id then
+      goto continue
+    end
+
     -- Build full file path
     local filepath = git_root .. '/' .. comment.path
 
-    -- Truncate body for quickfix display (first line only, max 80 chars)
-    local body_preview = comment.body:gsub('\r?\n.*', ''):sub(1, 80)
-    if #comment.body > 80 or comment.body:find('\n') then
-      body_preview = body_preview .. '...'
+    local num_replies = reply_count[comment.id] or 0
+    local text
+    if num_replies > 0 then
+      -- Has replies: show comment count (parent + replies)
+      local total = num_replies + 1
+      text = string.format('@%s: %d %s',
+        comment.author or 'unknown',
+        total,
+        total == 1 and 'comment' or 'comments')
+    else
+      -- No replies: show message preview as before
+      local body_preview = (comment.body or ''):gsub('\r?\n', ' ')
+      if #body_preview > 80 then
+        body_preview = body_preview:sub(1, 77) .. '...'
+      end
+      text = string.format('@%s: %s', comment.author or 'unknown', body_preview)
     end
-
-    -- Add prefix for replies to show hierarchy
-    local is_reply = comment.in_reply_to_id ~= nil
-    local prefix = is_reply and '  └── ' or ''
-    local text = prefix .. string.format('@%s: %s', comment.author, body_preview)
 
     table.insert(qf_items, {
       filename = filepath,
@@ -103,11 +120,13 @@ function M.populate(comments, pr_number)
       text = text,
       type = 'I', -- Info type
     })
+
+    ::continue::
   end
 
   -- Set quickfix list
   vim.fn.setqflist({}, 'r', {
-    title = string.format('PR #%d Review Comments (%d)', pr_number, #comments),
+    title = string.format('PR #%d Review Comments (%d)', pr_number, #qf_items),
     items = qf_items,
   })
 
