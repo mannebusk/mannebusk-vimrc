@@ -188,6 +188,11 @@ function M.reply_to_comment(comment, all_comments, pr_number)
           if vim.api.nvim_buf_is_valid(reply_buf) then
             vim.api.nvim_buf_delete(reply_buf, { force = true })
           end
+          -- Refetch comments to include the new reply
+          local init = require('pr-comments')
+          if init._pr_number_cache then
+            init.fetch_and_display(init._pr_number_cache)
+          end
         else
           vim.notify(err or 'Failed to submit reply', vim.log.levels.ERROR)
         end
