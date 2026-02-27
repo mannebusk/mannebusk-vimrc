@@ -83,8 +83,7 @@ vim.pack.add({
   { src = 'https://github.com/rmehri01/onenord.nvim' },
   { src = 'https://github.com/nvim-lualine/lualine.nvim' },
 
-  { src = 'https://github.com/nvim-tree/nvim-tree.lua' },
-  { src = 'https://github.com/nvim-tree/nvim-web-devicons' },
+  { src = 'https://github.com/echasnovski/mini.nvim' },
 
   { src = 'https://github.com/nvim-treesitter/nvim-treesitter' },
 
@@ -258,22 +257,24 @@ vim.keymap.set('n', '<leader>lwd', function() require("fzf-lua").lsp_workspace_d
 vim.keymap.set('n', '<leader>P', function() require("fzf-lua").builtin() end, {})
 
 --
--- nvim-tree
+-- mini.files
 --
-vim.opt.termguicolors = true
-
-require("nvim-tree").setup({
-  sort_by = "case_sensitive",
-  renderer = {
-    group_empty = true,
+local MiniFiles = require('mini.files')
+MiniFiles.setup({
+  content = {
+    filter = function(entry)
+      return entry.name ~= '.git'
+    end,
   },
-  filters = {
-    dotfiles = true,
+  mappings = {
+    close       = '<esc>',
+    go_in       = 'L',
+    go_in_plus  = 'l',
   },
 })
 
-vim.keymap.set('n', '<C-n>', ':NvimTreeToggle<CR>', { silent = true })
-vim.keymap.set('n', '<C-b>', ':NvimTreeFindFile<CR>', { silent = true })
+vim.keymap.set('n', '<C-n>', function() MiniFiles.open() end, { silent = true, desc = 'Open mini.files' })
+vim.keymap.set('n', '<C-b>', function() MiniFiles.open(vim.api.nvim_buf_get_name(0)) end, { silent = true, desc = 'Open mini.files at current file' })
 
 
 --

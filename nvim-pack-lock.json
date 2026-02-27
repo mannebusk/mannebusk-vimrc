@@ -17,6 +17,10 @@
       "rev": "b8c23159c0161f4b89196f74ee3a6d02cdc3a955",
       "src": "https://github.com/nvim-lualine/lualine.nvim"
     },
+    "mini.nvim": {
+      "rev": "a95dc67ecff78de138543a20c20f29f47111b122",
+      "src": "https://github.com/echasnovski/mini.nvim"
+    },
     "nvim-comment": {
       "rev": "e9ac16ab056695cad6461173693069ec070d2b23",
       "src": "https://github.com/terrortylor/nvim-comment"
