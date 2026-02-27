@@ -97,7 +97,6 @@ vim.pack.add({
   { src = 'https://github.com/terrortylor/nvim-comment' },
 
   { src = 'https://github.com/nvim-lua/plenary.nvim' },
-  { src = 'https://github.com/nvim-telescope/telescope.nvim' },
 
   { src = 'https://github.com/rescript-lang/vim-rescript' },
 
@@ -196,18 +195,6 @@ require('nvim_comment').setup()
 require('gitcast').setup()
 
 --
--- Telescope
---
-local builtin = require('telescope.builtin')
-
-
--- vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
-vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
-vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
-vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
-
-
---
 -- Lualine
 --
 require('lualine').setup {
@@ -222,9 +209,53 @@ require('lualine').setup {
 --
 -- FZF
 --
+local fzf = require("fzf-lua")
+fzf.setup({
+  fzf_colors = true,
+  buffers = {
+    actions = false,
+    ignore_current_buffer = true,
+    fzf_opts = { ["--delimiter"] = fzf.utils.nbsp, ["--with-nth"] = "-1.." },
+  },
+  oldfiles = {
+    cwd_only = true,
+  },
+  nvim_options = {
+    previewer = false,
+  },
+  keymaps = {
+    previewer = false,
+  },
+  commands = {
+    previewer = false,
+  },
+  blines = {
+    previewer = false,
+  },
+}
+)
+
+fzf.register_ui_select()
 
 vim.keymap.set('n', '<leader>ff',
-  function() require("fzf-lua").combine({ pickers = "buffers;oldfiles;files", previewer = false }) end, {})
+  function()
+    require("fzf-lua").combine({
+      pickers = "buffers;oldfiles;files",
+      previewer = false,
+    })
+  end, {})
+
+vim.keymap.set('n', '<leader>fg', function() require("fzf-lua").grep_project() end, {})
+vim.keymap.set('n', '<leader>fb', function() require("fzf-lua").grep_buffers() end, {})
+
+-- LSP and diagnostics bindings
+vim.keymap.set('n', '<leader>lr', function() require("fzf-lua").lsp_references() end, {})
+vim.keymap.set('n', '<leader>ld', function() require("fzf-lua").lsp_document_diagnostics() end, {})
+vim.keymap.set('n', '<leader>lwd', function() require("fzf-lua").lsp_workspace_diagnostics() end, {})
+
+
+
+vim.keymap.set('n', '<leader>P', function() require("fzf-lua").builtin() end, {})
 
 --
 -- nvim-tree
@@ -257,14 +288,13 @@ vim.lsp.enable('graphql')
 vim.api.nvim_create_autocmd('LspAttach', {
   group = vim.api.nvim_create_augroup('UserLspConfig', {}),
   callback = function(ev)
-
     --
     -- Combined hover function that shows diagnostics and hover info together
-    -- 
+    --
     local function combined_hover()
       local bufnr = vim.api.nvim_get_current_buf()
       local cursor_pos = vim.api.nvim_win_get_cursor(0)
-      local line = cursor_pos[1] - 1  -- 0-indexed
+      local line = cursor_pos[1] - 1 -- 0-indexed
       local col = cursor_pos[2]
 
       -- Get diagnostics at the exact cursor position
