@@ -123,7 +123,11 @@ require('config')
 --
 -- Copy commands (yK etc.)
 --
-require('copy')
+local Copy = require('copy')
+
+
+vim.keymap.set('n', 'yL', function() Copy.location(false) end, { desc = 'Copy file location to clipboard' })
+vim.keymap.set('x', 'yL', function() Copy.location(true) end, { desc = 'Copy file location range to clipboard' })
 
 
 --
@@ -385,7 +389,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     --
     -- Copy type to clipboard
     --
-    vim.keymap.set('n', 'yK', require('copy').copy_type, { buffer = ev.buf, desc = 'Copy type to clipboard' })
+    vim.keymap.set('n', 'yK', Copy.lsp_type, { buffer = ev.buf, desc = 'Copy type to clipboard' })
   end,
 })
 
