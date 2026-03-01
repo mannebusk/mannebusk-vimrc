@@ -105,8 +105,16 @@ vim.pack.add({
 
   { src = 'https://github.com/ibhagwan/fzf-lua' },
 
-  { src = 'https://github.com/supermaven-inc/supermaven-nvim' }
+  { src = 'https://github.com/supermaven-inc/supermaven-nvim' },
+
+  { src = 'https://github.com/rcarriga/nvim-notify' }
 })
+
+--
+-- Notify
+--
+require("notify").setup({ render = "wrapped-default" })
+vim.notify = require("notify")
 
 --
 -- CheatSheet windows to remember things

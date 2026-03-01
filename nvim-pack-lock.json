@@ -25,6 +25,10 @@
       "rev": "e9ac16ab056695cad6461173693069ec070d2b23",
       "src": "https://github.com/terrortylor/nvim-comment"
     },
+    "nvim-notify": {
+      "rev": "8701bece920b38ea289b457f902e2ad184131a5d",
+      "src": "https://github.com/rcarriga/nvim-notify"
+    },
     "nvim-tree.lua": {
       "rev": "e179ad2f83b5955ab0af653069a493a1828c2697",
       "src": "https://github.com/nvim-tree/nvim-tree.lua"
