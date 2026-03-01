@@ -415,6 +415,12 @@ require('tsc').setup()
 
 
 --
+-- ReScript - Parse compiler log into quickfix
+--
+require('rescript')
+
+
+--
 -- PR Comments - GitHub PR review comments viewer
 --
 require('pr-comments').setup()
