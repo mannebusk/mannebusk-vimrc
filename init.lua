@@ -341,7 +341,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
       end
 
       -- Request hover info
-      local params = vim.lsp.util.make_position_params()
+      local client = vim.lsp.get_clients({ bufnr = bufnr })[1]
+      local params = vim.lsp.util.make_position_params(0, client and client.offset_encoding or 'utf-16')
       vim.lsp.buf_request(bufnr, 'textDocument/hover', params, function(err, result)
         if err then return end
 
@@ -399,6 +400,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     --
     vim.keymap.set('n', 'yK', Copy.lsp_type, { buffer = ev.buf, desc = 'Copy type to clipboard' })
     vim.keymap.set('n', 'yD', Copy.lsp_diagnostic, { buffer = ev.buf, desc = 'Copy diagnostic to clipboard' })
+    vim.keymap.set('n', 'yLL', Copy.location_context, { buffer = ev.buf, desc = 'Copy location with context to clipboard' })
   end,
 })
 

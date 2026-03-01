@@ -55,17 +55,22 @@ function M.location(is_visual)
   end
 
   vim.fn.setreg('+', location)
-  vim.notify('Copied: ' .. location, vim.log.levels.INFO)
+  vim.notify('Copied: ' .. location, vim.log.levels.INFO, { title = "Copy - Location" })
 end
 
 --
 -- Copy type from LSP hover to clipboard
 --
 function M.lsp_type()
-  local params = vim.lsp.util.make_position_params()
+  local client = vim.lsp.get_clients({ bufnr = 0 })[1]
+  if not client then
+    vim.notify('No LSP client attached', vim.log.levels.WARN, { title = "Copy - LSP Type" })
+    return
+  end
+  local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
   vim.lsp.buf_request(0, 'textDocument/hover', params, function(err, result)
     if err or not result or not result.contents then
-      vim.notify('No type information available', vim.log.levels.WARN)
+      vim.notify('No type information available', vim.log.levels.WARN, { title = "Copy - LSP Type" })
       return
     end
 
@@ -83,7 +88,7 @@ function M.lsp_type()
     end
 
     if not text then
-      vim.notify('No type information available', vim.log.levels.WARN)
+      vim.notify('No type information available', vim.log.levels.WARN, { title = "Copy - LSP Type" })
       return
     end
 
@@ -98,7 +103,7 @@ function M.lsp_type()
 
     -- Copy to system clipboard
     vim.fn.setreg('+', text)
-    vim.notify('Copied: ' .. text:sub(1, 50) .. (text:len() > 50 and '...' or ''), vim.log.levels.INFO)
+    vim.notify('Copied: ' .. text:sub(1, 50) .. (text:len() > 50 and '...' or ''), vim.log.levels.INFO, { title = "Copy - LSP Type" })
   end)
 end
 
@@ -112,7 +117,7 @@ function M.lsp_diagnostic()
 
   local diagnostics = vim.diagnostic.get(0, { lnum = cursor_line })
   if #diagnostics == 0 then
-    vim.notify('No diagnostics on current line', vim.log.levels.WARN)
+    vim.notify('No diagnostics on current line', vim.log.levels.WARN, { title = "Copy - LSP Diagnostic" })
     return
   end
 
@@ -129,7 +134,68 @@ function M.lsp_diagnostic()
 
   local msg = best.message
   vim.fn.setreg('+', msg)
-  vim.notify('Copied: ' .. msg:sub(1, 50) .. (msg:len() > 50 and '...' or ''), vim.log.levels.INFO)
+  vim.notify('Copied: ' .. msg:sub(1, 50) .. (msg:len() > 50 and '...' or ''), vim.log.levels.INFO, { title = "Copy - LSP Diagnostic" })
+end
+
+--
+-- Copy location with LSP hover context to clipboard
+--
+function M.location_context()
+  local client = vim.lsp.get_clients({ bufnr = 0 })[1]
+  if not client then
+    return M.location(false)
+  end
+
+  local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
+  vim.lsp.buf_request(0, 'textDocument/hover', params, function(err, result)
+    if err or not result or not result.contents then
+      return M.location(false)
+    end
+
+    -- Extract hover text (same logic as lsp_type)
+    local contents = result.contents
+    local text
+    if type(contents) == 'table' and contents.value then
+      text = contents.value
+    elseif type(contents) == 'string' then
+      text = contents
+    elseif type(contents) == 'table' and contents[1] then
+      local item = contents[1]
+      text = type(item) == 'string' and item or item.value
+    end
+
+    if not text then
+      return M.location(false)
+    end
+
+    -- Strip markdown code fence if present
+    local inner = text:match('```%w*\n(.-)```')
+    if inner then
+      text = vim.trim(inner)
+    else
+      text = vim.trim(text)
+    end
+
+    -- Parse kind from hover text
+    local kind = text:match('^%((%w+)%)')          -- (method), (property), (alias)
+        or text:match('^(%w+)%s')                   -- function, const, class, etc.
+
+    local cword = vim.fn.expand('<cword>')
+    local path = get_file_path()
+    local cursor = vim.api.nvim_win_get_cursor(0)
+    local line = cursor[1]
+    local col = cursor[2] + 1
+
+    local location
+    if kind then
+      location = string.format('%s `%s` in %s:%d:%d', kind, cword, path, line, col)
+    else
+      location = string.format('`%s` in %s:%d:%d', cword, path, line, col)
+    end
+
+    vim.fn.setreg('+', location)
+    vim.notify('Copied: ' .. location, vim.log.levels.INFO, { title = "Copy - Location Context" })
+  end)
 end
 
 return M
