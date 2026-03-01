@@ -102,4 +102,34 @@ function M.lsp_type()
   end)
 end
 
+--
+-- Copy LSP diagnostic message to clipboard
+--
+function M.lsp_diagnostic()
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local cursor_line = cursor[1] - 1 -- 0-based
+  local cursor_col = cursor[2]
+
+  local diagnostics = vim.diagnostic.get(0, { lnum = cursor_line })
+  if #diagnostics == 0 then
+    vim.notify('No diagnostics on current line', vim.log.levels.WARN)
+    return
+  end
+
+  -- Pick the diagnostic closest to the cursor column
+  local best = diagnostics[1]
+  local best_dist = math.abs(best.col - cursor_col)
+  for i = 2, #diagnostics do
+    local dist = math.abs(diagnostics[i].col - cursor_col)
+    if dist < best_dist then
+      best = diagnostics[i]
+      best_dist = dist
+    end
+  end
+
+  local msg = best.message
+  vim.fn.setreg('+', msg)
+  vim.notify('Copied: ' .. msg:sub(1, 50) .. (msg:len() > 50 and '...' or ''), vim.log.levels.INFO)
+end
+
 return M

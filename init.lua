@@ -390,6 +390,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     -- Copy type to clipboard
     --
     vim.keymap.set('n', 'yK', Copy.lsp_type, { buffer = ev.buf, desc = 'Copy type to clipboard' })
+    vim.keymap.set('n', 'yD', Copy.lsp_diagnostic, { buffer = ev.buf, desc = 'Copy diagnostic to clipboard' })
   end,
 })
 
