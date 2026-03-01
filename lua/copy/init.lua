@@ -10,6 +10,67 @@ local function get_git_root()
   return vim.trim(result.stdout)
 end
 
+local function get_git_remote_url()
+  local result = vim.system({ 'git', 'remote', 'get-url', 'origin' }, { text = true }):wait()
+  if result.code ~= 0 or not result.stdout then return nil end
+  return vim.trim(result.stdout)
+end
+
+local function parse_github_url(remote_url)
+  -- SSH: git@github.com:org/repo.git
+  local org, repo = remote_url:match('^git@github%.com:([^/]+)/(.+)$')
+  if not org then
+    -- HTTPS: https://github.com/org/repo.git
+    org, repo = remote_url:match('^https://github%.com/([^/]+)/(.+)$')
+  end
+  if not org then return nil, nil end
+  repo = repo:gsub('%.git$', '')
+  return org, repo
+end
+
+local function get_git_branch()
+  local result = vim.system({ 'git', 'rev-parse', '--abbrev-ref', 'HEAD' }, { text = true }):wait()
+  if result.code ~= 0 or not result.stdout then return nil end
+  return vim.trim(result.stdout)
+end
+
+local spinner_frames = { '⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷' }
+
+local function check_branch_on_remote(branch, cwd, on_result)
+  local notification
+  local spinner_idx = 0
+  local spinning = true
+
+  local function spin()
+    if not spinning then return end
+    spinner_idx = (spinner_idx % #spinner_frames) + 1
+    notification = vim.notify('Checking remote for branch "' .. branch .. '"...', vim.log.levels.INFO, {
+      title = 'Copy - GitHub URL',
+      icon = spinner_frames[spinner_idx],
+      replace = notification,
+      hide_from_history = true,
+    })
+    vim.defer_fn(spin, 100)
+  end
+
+  spin()
+
+  vim.system({ 'git', 'ls-remote', '--heads', 'origin', branch }, { text = true, cwd = cwd }, function(result)
+    spinning = false
+    vim.schedule(function()
+      local status
+      if result.code ~= 0 then
+        status = 'unknown'
+      elseif result.stdout and vim.trim(result.stdout) ~= '' then
+        status = 'yes'
+      else
+        status = 'no'
+      end
+      on_result(status, notification)
+    end)
+  end)
+end
+
 local function get_file_path()
   local abs_path = vim.fn.expand('%:p')
   local style = M.config.path_style
@@ -195,6 +256,74 @@ function M.location_context()
 
     vim.fn.setreg('+', location)
     vim.notify('Copied: ' .. location, vim.log.levels.INFO, { title = "Copy - Location Context" })
+  end)
+end
+
+--
+-- Copy GitHub URL for current location to clipboard
+--
+function M.location_github(is_visual)
+  local git_root = get_git_root()
+  if not git_root then
+    vim.notify('Not in a git repository', vim.log.levels.WARN, { title = "Copy - GitHub URL" })
+    return
+  end
+
+  local remote_url = get_git_remote_url()
+  if not remote_url then
+    vim.notify('No git remote origin found', vim.log.levels.WARN, { title = "Copy - GitHub URL" })
+    return
+  end
+
+  local org, repo = parse_github_url(remote_url)
+  if not org then
+    vim.notify('Remote is not a GitHub URL', vim.log.levels.WARN, { title = "Copy - GitHub URL" })
+    return
+  end
+
+  local branch = get_git_branch()
+  if not branch then
+    vim.notify('Could not determine git branch', vim.log.levels.WARN, { title = "Copy - GitHub URL" })
+    return
+  end
+
+  -- Capture buffer state before async call
+  local rel_path = vim.fn.expand('%:p'):sub(#git_root + 2)
+  local line_ref
+
+  if is_visual then
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, false, true), 'nx', false)
+    local start_line = vim.fn.getpos("'<")[2]
+    local end_line = vim.fn.getpos("'>")[2]
+    line_ref = string.format('#L%d-L%d', start_line, end_line)
+  else
+    local line = vim.api.nvim_win_get_cursor(0)[1]
+    line_ref = string.format('#L%d', line)
+  end
+
+  check_branch_on_remote(branch, git_root, function(status, notification)
+    if status == 'no' then
+      vim.notify('Branch "' .. branch .. '" does not exist on remote', vim.log.levels.WARN, {
+        title = 'Copy - GitHub URL',
+        replace = notification,
+      })
+      return
+    end
+
+    local url = string.format('https://github.com/%s/%s/blob/%s/%s%s', org, repo, branch, rel_path, line_ref)
+    vim.fn.setreg('+', url)
+
+    if status == 'unknown' then
+      vim.notify('Could not verify existence of branch "' .. branch .. '" on remote. Link might not work!', vim.log.levels.WARN, {
+        title = 'Copy - GitHub URL',
+        replace = notification,
+      })
+    else
+      vim.notify('Copied: ' .. url, vim.log.levels.INFO, {
+        title = 'Copy - GitHub URL',
+        replace = notification,
+      })
+    end
   end)
 end
 

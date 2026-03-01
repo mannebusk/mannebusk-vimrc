@@ -137,6 +137,9 @@ local Copy = require('copy')
 vim.keymap.set('n', 'yL', function() Copy.location(false) end, { desc = 'Copy file location to clipboard' })
 vim.keymap.set('x', 'yL', function() Copy.location(true) end, { desc = 'Copy file location range to clipboard' })
 
+vim.keymap.set('n', 'yLG', function() Copy.location_github(false) end, { desc = 'Copy GitHub URL to clipboard' })
+vim.keymap.set('x', 'yLG', function() Copy.location_github(true) end, { desc = 'Copy GitHub URL range to clipboard' })
+
 
 --
 -- nvim-treesitter
