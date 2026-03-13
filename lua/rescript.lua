@@ -1,7 +1,13 @@
 local M = {}
 
-local function notify(msg, level)
-  vim.notify(msg, level, { title = 'ReScript' })
+M.config = {
+  open_qf_on_watch = false,
+}
+
+local watch_task = nil
+
+local function notify(msg, level, opts)
+  return vim.notify(msg, level, vim.tbl_extend('force', { title = 'ReScript' }, opts or {}))
 end
 
 --- Find the ReScript project root by looking for rescript.json
@@ -165,28 +171,38 @@ local function parse_compiler_output(lines)
   return items
 end
 
-function M.run()
+function M.run(opts)
+  opts = opts or {}
+
+  -- Wrapper that passes replace on first call only (smooth spinner transition)
+  local replace = opts.replace_notification
+  local function run_notify(msg, level)
+    local n = notify(msg, level, replace and { replace = replace } or nil)
+    replace = nil
+    return n
+  end
+
   local root = find_project_root()
   if not root then
-    notify('No rescript.json found', vim.log.levels.ERROR)
+    run_notify('No rescript.json found', vim.log.levels.ERROR)
     return
   end
 
   local log_path = root .. '/lib/bs/.compiler.log'
   if vim.fn.filereadable(log_path) ~= 1 then
-    notify('Compiler log not found: ' .. log_path, vim.log.levels.ERROR)
+    run_notify('Compiler log not found: ' .. log_path, vim.log.levels.ERROR)
     return
   end
 
   local lines = vim.fn.readfile(log_path)
   if #lines == 0 then
-    notify('Compiler log is empty', vim.log.levels.WARN)
+    run_notify('Compiler log is empty', vim.log.levels.WARN)
     return
   end
 
   local entries = parse_log_entries(lines)
   if #entries == 0 then
-    notify('No issues found', vim.log.levels.INFO)
+    run_notify('No issues found', vim.log.levels.INFO)
     return
   end
 
@@ -194,7 +210,7 @@ function M.run()
   local qf_items = parse_compiler_output(latest)
 
   if #qf_items == 0 then
-    notify('No issues found', vim.log.levels.INFO)
+    run_notify('No issues found', vim.log.levels.INFO)
     return
   end
 
@@ -212,17 +228,106 @@ function M.run()
     title = 'ReScript Compiler',
     items = qf_items,
   })
-  vim.cmd('copen')
+  if opts.open_qf ~= false then
+    vim.cmd('copen')
+  end
 
   local summary = string.format('%d error%s, %d warning%s',
     errors, errors == 1 and '' or 's',
     warnings, warnings == 1 and '' or 's')
   local level = errors > 0 and vim.log.levels.ERROR or vim.log.levels.WARN
-  notify(summary, level)
+  run_notify(summary, level)
 end
 
-vim.api.nvim_create_user_command('RES', function() M.run() end, {
-  desc = 'Parse ReScript compiler log and show issues in quickfix',
-})
+function M.watch_start()
+  local root = find_project_root()
+  if not root then
+    notify('No rescript.json found', vim.log.levels.ERROR)
+    return
+  end
+
+  if watch_task then
+    notify('Watch mode already running', vim.log.levels.WARN)
+    return
+  end
+
+  local overseer = require('overseer')
+  watch_task = overseer.new_task({
+    name = 'ReScript Watch',
+    cmd = { 'npx', 'rescript', 'build', '-w' },
+    cwd = root,
+    components = {
+      'rescript_watch',
+      'on_exit_set_status',
+    },
+  })
+  watch_task:start()
+  notify('Watch mode started', vim.log.levels.INFO)
+end
+
+function M.watch_stop()
+  if not watch_task then
+    notify('Watch mode is not running', vim.log.levels.WARN)
+    return
+  end
+
+  watch_task:stop()
+  watch_task:dispose()
+  watch_task = nil
+  notify('Watch mode stopped', vim.log.levels.INFO)
+end
+
+function M.watch_toggle()
+  if watch_task then
+    M.watch_stop()
+  else
+    M.watch_start()
+  end
+end
+
+-- Register overseer template (pcall-guarded in case overseer isn't loaded)
+pcall(function()
+  require('overseer').register_template({
+    name = 'ReScript Watch',
+    builder = function()
+      return {
+        cmd = { 'npx', 'rescript', 'build', '-w' },
+        cwd = find_project_root(),
+        components = {
+          'rescript_watch',
+          'on_exit_set_status',
+        },
+      }
+    end,
+    condition = {
+      callback = function()
+        return find_project_root() ~= nil
+      end,
+    },
+  })
+end)
+
+function M.setup(opts)
+  M.config = vim.tbl_deep_extend('force', M.config, opts or {})
+
+  vim.api.nvim_create_user_command('RES', function() M.run() end, {
+    desc = 'Parse ReScript compiler log and show issues in quickfix',
+  })
+
+  vim.api.nvim_create_user_command('RESWatch', function(cmd)
+    if cmd.bang then
+      -- Force restart
+      if watch_task then
+        M.watch_stop()
+      end
+      M.watch_start()
+    else
+      M.watch_toggle()
+    end
+  end, {
+    bang = true,
+    desc = 'Toggle ReScript watch mode (! to force restart)',
+  })
+end
 
 return M

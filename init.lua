@@ -107,7 +107,9 @@ vim.pack.add({
 
   { src = 'https://github.com/supermaven-inc/supermaven-nvim' },
 
-  { src = 'https://github.com/rcarriga/nvim-notify' }
+  { src = 'https://github.com/rcarriga/nvim-notify' },
+
+  { src = 'https://github.com/stevearc/overseer.nvim' },
 })
 
 --
@@ -415,9 +417,14 @@ require('tsc').setup()
 
 
 --
+-- Overseer (task runner)
+--
+require("overseer").setup()
+
+--
 -- ReScript - Parse compiler log into quickfix
 --
-require('rescript')
+require('rescript').setup({})
 
 
 --
