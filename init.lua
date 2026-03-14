@@ -133,6 +133,7 @@ require('config')
 --
 -- Copy commands (yK etc.)
 --
+vim.cmd.packadd('copy')
 local Copy = require('copy')
 
 
