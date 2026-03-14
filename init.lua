@@ -133,6 +133,7 @@ require('config')
 --
 -- Copy commands (yK etc.)
 --
+vim.cmd.packadd('copy')
 local Copy = require('copy')
 
 
@@ -424,10 +425,12 @@ require("overseer").setup()
 --
 -- ReScript - Parse compiler log into quickfix
 --
+vim.cmd.packadd('rescript')
 require('rescript').setup({})
 
 
 --
 -- PR Comments - GitHub PR review comments viewer
 --
+vim.cmd.packadd('pr-comments')
 require('pr-comments').setup()
