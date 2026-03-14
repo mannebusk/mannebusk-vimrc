@@ -432,4 +432,5 @@ require('rescript').setup({})
 --
 -- PR Comments - GitHub PR review comments viewer
 --
+vim.cmd.packadd('pr-comments')
 require('pr-comments').setup()
