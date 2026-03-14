@@ -105,7 +105,7 @@ vim.pack.add({
 
   { src = 'https://github.com/ibhagwan/fzf-lua' },
 
-  { src = 'https://github.com/supermaven-inc/supermaven-nvim' },
+  { src = 'https://github.com/Exafunction/windsurf.nvim' },
 
   { src = 'https://github.com/rcarriga/nvim-notify' },
 
@@ -153,12 +153,19 @@ vim.g.markdown_fenced_languages = { 'javascript', 'typescript', 'html', 'css', '
 
 
 --
--- supermaven-nvim
+-- windsurf.nvim (Codeium)
 --
-require("supermaven-nvim").setup({
-  keymaps = {
-    accept_suggestion = "<S-Tab>",
-    accept_word = "<Tab>",
+require("codeium").setup({
+  enable_cmp_source = false, -- We use blink.cmp, not nvim-cmp
+  virtual_text = {
+    enabled = true,
+    key_bindings = {
+      accept = "<S-Tab>",      -- Same as supermaven accept_suggestion
+      accept_word = "<Tab>",   -- Same as supermaven accept_word
+      clear = "<C-e>",         -- Dismiss suggestion
+      next = "<M-]>",          -- Cycle to next suggestion
+      prev = "<M-[>",          -- Cycle to previous suggestion
+    }
   }
 })
 
