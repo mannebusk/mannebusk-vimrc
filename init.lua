@@ -424,6 +424,7 @@ require("overseer").setup()
 --
 -- ReScript - Parse compiler log into quickfix
 --
+vim.cmd.packadd('rescript')
 require('rescript').setup({})
 
 
