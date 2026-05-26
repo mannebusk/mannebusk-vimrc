@@ -315,6 +315,7 @@ vim.lsp.enable('lua_ls')
 vim.lsp.enable('ts_ls')
 vim.lsp.enable('rescriptls')
 vim.lsp.enable('graphql')
+vim.lsp.enable('gopls')
 
 -- Set up the keymap when LSP attaches to a buffer
 vim.api.nvim_create_autocmd('LspAttach', {
