@@ -50,6 +50,17 @@
 
 (parameter_list (identifier) @variable.parameter)
 
+; Pattern binders introduce a new name the same way a parameter does, so they
+; are highlighted as parameters rather than as ordinary references. The `tag`
+; and `type` fields are constructors and nominal names, so only the nested
+; patterns can match `(identifier)` here.
+
+(match_arm pattern: (identifier) @variable.parameter)
+(tag_pattern (identifier) @variable.parameter)
+(nominal_pattern (identifier) @variable.parameter)
+(list_pattern (identifier) @variable.parameter)
+(rest_pattern (identifier) @variable.parameter)
+
 ; ---- Nominal types ----
 ;
 ; `@` marks a nominal type's name everywhere it is written — the declaration,
@@ -72,9 +83,23 @@
 
 ; ---- Function definitions & calls ----
 
+; A definition's name is not a reference to one. Bert has no mutation, so a
+; binding of a non-function value reads as a constant; a binding of a function
+; literal is a function. A signature is highlighted like the binding it
+; annotates so the two lines of a declaration match.
+
+(binding name: (identifier) @constant)
+(signature name: (identifier) @constant)
+(signature
+  name: (identifier) @function
+  type: (function_type))
+
 (binding
   name: (identifier) @function
   value: [(function_literal) (lambda)])
+
+; Export items name the file's own definitions.
+(export_clause (identifier) @constant)
 
 (call function: (identifier) @function.call)
 (call function: (scoped_identifier name: (identifier) @function.call))
