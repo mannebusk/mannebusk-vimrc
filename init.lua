@@ -442,3 +442,10 @@ require('rescript').setup({})
 --
 vim.cmd.packadd('pr-comments')
 require('pr-comments').setup()
+
+
+--
+-- Bert - filetype, tree-sitter highlighting, :BertGrammarBuild
+--
+vim.cmd.packadd('bert')
+require('bert').setup({})
