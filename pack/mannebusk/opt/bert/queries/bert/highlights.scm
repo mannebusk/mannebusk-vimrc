@@ -20,7 +20,7 @@
 
 ["if" "then" "else" "match"] @keyword.conditional
 (export) @keyword
-["test" "type"] @keyword
+["test" "type" "external"] @keyword
 
 ; A test's name string is a label rather than ordinary string data.
 (test_declaration name: (string_literal) @string.special)
@@ -91,6 +91,11 @@
 (binding name: (identifier) @constant)
 (signature name: (identifier) @constant)
 (signature
+  name: (identifier) @function
+  type: (function_type))
+
+(external_declaration name: (identifier) @constant)
+(external_declaration
   name: (identifier) @function
   type: (function_type))
 
