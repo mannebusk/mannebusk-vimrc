@@ -137,11 +137,12 @@ vim.cmd.packadd('copy')
 local Copy = require('copy')
 
 
-vim.keymap.set('n', 'yL', function() Copy.location(false) end, { desc = 'Copy file location to clipboard' })
-vim.keymap.set('x', 'yL', function() Copy.location(true) end, { desc = 'Copy file location range to clipboard' })
+-- Leader-prefixed so visual-mode `y` doesn't wait for timeoutlen on an ambiguous mapping.
+vim.keymap.set('n', '<leader>yl', function() Copy.location(false) end, { desc = 'Copy file location to clipboard' })
+vim.keymap.set('x', '<leader>yl', function() Copy.location(true) end, { desc = 'Copy file location range to clipboard' })
 
-vim.keymap.set('n', 'yLG', function() Copy.location_github(false) end, { desc = 'Copy GitHub URL to clipboard' })
-vim.keymap.set('x', 'yLG', function() Copy.location_github(true) end, { desc = 'Copy GitHub URL range to clipboard' })
+vim.keymap.set('n', '<leader>yg', function() Copy.location_github(false) end, { desc = 'Copy GitHub URL to clipboard' })
+vim.keymap.set('x', '<leader>yg', function() Copy.location_github(true) end, { desc = 'Copy GitHub URL range to clipboard' })
 
 
 --
@@ -414,7 +415,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     --
     vim.keymap.set('n', 'yK', Copy.lsp_type, { buffer = ev.buf, desc = 'Copy type to clipboard' })
     vim.keymap.set('n', 'yD', Copy.lsp_diagnostic, { buffer = ev.buf, desc = 'Copy diagnostic to clipboard' })
-    vim.keymap.set('n', 'yLL', Copy.location_context, { buffer = ev.buf, desc = 'Copy location with context to clipboard' })
+    vim.keymap.set('n', '<leader>yc', Copy.location_context, { buffer = ev.buf, desc = 'Copy location with context to clipboard' })
   end,
 })
 
